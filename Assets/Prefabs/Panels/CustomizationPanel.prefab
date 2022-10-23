@@ -1223,7 +1223,7 @@ GameObject:
   - component: {fileID: 9127764306641682669}
   - component: {fileID: 9127764306641682674}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: Speed (Slider)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1299,7 +1299,7 @@ MonoBehaviour:
   m_MinValue: 0.1
   m_MaxValue: 5
   m_WholeNumbers: 0
-  m_Value: 0.4
+  m_Value: 0.2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -2285,7 +2285,7 @@ GameObject:
   - component: {fileID: 9127764307480156471}
   - component: {fileID: 9127764307480156468}
   m_Layer: 5
-  m_Name: Toggle
+  m_Name: Simulate (Toggle)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

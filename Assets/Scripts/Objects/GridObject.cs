@@ -44,7 +44,7 @@ public class GridObject : MonoBehaviour
     public static event CellDataUpdate OnGenerationChange;
     public static event CellDataUpdate OnCellCountChange;
 
-    private void Awake()
+    private void Start()
     {
         simulateIEnum = Simulate();
     }
@@ -64,8 +64,8 @@ public class GridObject : MonoBehaviour
     {
         while (true)
         {
-            NextGeneration();
             yield return new WaitForSeconds(simulationSpeed);
+            NextGeneration();
         }
     }
 
@@ -161,9 +161,12 @@ public class GridObject : MonoBehaviour
         {
             for (int y = 0; y < gridSize.y; y++)
             {
+                // This project version is using Unity 2020.3 LTS
+                // Built-in object pooling is only available in Unity 2021
                 CellObject cell;
                 if (cellPoolObject.Count == 0)
                 {
+                    // Create cells if object pool list is empty
                     cell = Instantiate(cellObject, Vector3.zero, Quaternion.identity);
                 }
                 else
