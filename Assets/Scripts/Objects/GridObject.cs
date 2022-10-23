@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridObject : MonoBehaviour
@@ -12,6 +13,8 @@ public class GridObject : MonoBehaviour
     private CellObject cellObject;
     private CellObject[,] cellObjectArray;
 
+    private List<CellObject> cellPoolObject = new List<CellObject>();
+
     [SerializeField]
     private Vector2Int gridSize = new Vector2Int(30, 30);
 
@@ -19,6 +22,7 @@ public class GridObject : MonoBehaviour
 
     private IEnumerator simulateIEnum;
 
+    public bool IsSameSize => cellObjectArray.GetLength(0) == gridSize.x && cellObjectArray.GetLength(1) == gridSize.y;
     public float SimulationSpeed
     {
         get => simulationSpeed;
@@ -58,7 +62,6 @@ public class GridObject : MonoBehaviour
     }
     private IEnumerator Simulate()
     {
-        yield return new WaitForSeconds(simulationSpeed);
         while (true)
         {
             NextGeneration();
@@ -68,7 +71,11 @@ public class GridObject : MonoBehaviour
 
     public void NextGeneration()
     {
-        if (gridParent == null) return;
+        if (gridParent == null)
+        {
+            Debug.Log("Randomize Grid First!");
+            return;
+        }
 
         for (int x = 0; x < gridSize.x; x++)
         {
@@ -98,7 +105,11 @@ public class GridObject : MonoBehaviour
             }
         }
 
-        if (cellCount == 0) return;
+        if (cellCount == 0 && currentGenerationCount == 0)
+        {
+            Debug.Log("Randomize Grid First!");
+            return;
+        }
         currentGenerationCount++;
 
         OnGenerationChange?.Invoke(currentGenerationCount);
@@ -107,12 +118,40 @@ public class GridObject : MonoBehaviour
 
     public void GenerateGrid()
     {
-        if (this.gridParent != null)
+        if (gridParent != null)
         {
-            Destroy(this.gridParent);
-        }
+            // Add to Pool Object
+            for (int x = 0; x < cellObjectArray.GetLength(0); x++)
+            {
+                for (int y = 0; y < cellObjectArray.GetLength(1); y++)
+                {
+                    try
+                    {
+                        CellObject cell = cellObjectArray[x, y];
+                        cell.SetAlive(false);
+                        if (!IsSameSize)
+                        {
+                            cell.gameObject.SetActive(false);
+                            cell.transform.SetParent(transform);
+                            cellPoolObject.Add(cell);
+                        }
+                    }
+                    catch { }
+                }
+            }
 
-        Transform gridParent = new GameObject("Grid Parent").transform;
+            if (IsSameSize)
+            {
+                Debug.Log("Same Grid Size! Hide Cells!");
+                return;
+            }
+        }
+        else
+        {
+            Transform cellParent = new GameObject("Grid Parent").transform;
+            gridParent = cellParent.gameObject;
+            gridParent.transform.position = transform.position;
+        }
 
         Vector2 cellSize = new Vector2(cellObject.GetComponent<SpriteRenderer>().bounds.size.x, cellObject.GetComponent<SpriteRenderer>().bounds.size.y);
 
@@ -122,17 +161,27 @@ public class GridObject : MonoBehaviour
         {
             for (int y = 0; y < gridSize.y; y++)
             {
-                CellObject cell = Instantiate(cellObject, new Vector3(-(cellSize.x * gridSize.x / 2) + cellSize.x * x, -(cellSize.y * gridSize.y / 2) + cellSize.y * y, 0), Quaternion.identity);
-                cell.transform.SetParent(gridParent);
+                CellObject cell;
+                if (cellPoolObject.Count == 0)
+                {
+                    cell = Instantiate(cellObject, Vector3.zero, Quaternion.identity);
+                }
+                else
+                {
+                    // Get cells from the Pool Object
+                    cell = cellPoolObject[cellPoolObject.Count - 1];
+                    cell.gameObject.SetActive(true);
+                    cellPoolObject.Remove(cell);
+                }
+
+                cell.transform.SetParent(gridParent.transform);
+                cell.transform.localPosition = new Vector3(-(cellSize.x * gridSize.x / 2) + cellSize.x * x, -(cellSize.y * gridSize.y / 2) + cellSize.y * y, 0);
                 cell.cellPosition = new Vector2(x, y);
                 cell.name = $"Cell_Object {x}_{y}";
 
                 cellObjectArray[x, y] = cell;
             }
         }
-
-        this.gridParent = gridParent.gameObject;
-        gridParent.position = transform.position;
 
         currentGenerationCount = 0;
         OnGenerationChange?.Invoke(currentGenerationCount);
@@ -141,11 +190,10 @@ public class GridObject : MonoBehaviour
 
     public void RandomizeGrid()
     {
-        if (gridParent == null)
+        if (gridParent == null || !IsSameSize)
         {
+            Debug.Log("Generating Grid... Randomize Grid...");
             GenerateGrid();
-            RandomizeGrid();
-            return;
         }
 
         int cellCount = 0;

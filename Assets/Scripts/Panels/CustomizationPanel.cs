@@ -21,11 +21,12 @@ public class CustomizationPanel : MonoBehaviour
     public static Action OnRandomize;
 
     public delegate void CellGrid(int value);
-    public static event CellGrid CellHeight;
-    public static event CellGrid CellWidth;
+    public static event CellGrid OnCellHeight;
+    public static event CellGrid OnCellWidth;
 
     private IEnumerator Start()
     {
+        // Added a delay
         yield return new WaitForSeconds(.5f);
         if (simulateToggle.isOn)
         {
@@ -39,13 +40,13 @@ public class CustomizationPanel : MonoBehaviour
 
     public void Height(float value)
     {
-        heightText.text = $"Width: {(int)value}";
-        CellHeight?.Invoke((int)value);
+        heightText.text = $"Height: {(int)value}";
+        OnCellHeight?.Invoke((int)value);
     }
     public void Width(float value)
     {
-        widthText.text = $"Height: {(int)value}";
-        CellWidth?.Invoke((int)value);
+        widthText.text = $"Width: {(int)value}";
+        OnCellWidth?.Invoke((int)value);
     }
 
     // Is called in the slider

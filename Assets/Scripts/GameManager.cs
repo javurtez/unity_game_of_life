@@ -15,8 +15,8 @@ public class GameManager : MonoBehaviour
         CustomizationPanel.OnReset += cellGrid.GenerateGrid;
         CustomizationPanel.OnRandomize += cellGrid.RandomizeGrid;
 
-        CustomizationPanel.CellWidth += Width;
-        CustomizationPanel.CellHeight += Height;
+        CustomizationPanel.OnCellWidth += Width;
+        CustomizationPanel.OnCellHeight += Height;
     }
     public void OnDisable()
     {
@@ -27,8 +27,8 @@ public class GameManager : MonoBehaviour
         CustomizationPanel.OnReset -= cellGrid.GenerateGrid;
         CustomizationPanel.OnRandomize -= cellGrid.RandomizeGrid;
 
-        CustomizationPanel.CellWidth -= Width;
-        CustomizationPanel.CellHeight -= Height;
+        CustomizationPanel.OnCellWidth -= Width;
+        CustomizationPanel.OnCellHeight -= Height;
     }
 
     private void Height(int height)
